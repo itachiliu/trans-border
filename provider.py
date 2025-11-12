@@ -1,9 +1,14 @@
 import asyncio
+import csv
 import json
-from datetime import datetime, timezone
+import os
+import time
+from datetime import datetime, time as dt_time  # 避免名称冲突
 
 import didkit
 
+import HashMethod
+import VCHashUpload
 import fileoper
 import transettings
 
@@ -19,7 +24,7 @@ class Provider:
         self.did = didkit.key_to_did("key", self.key)
         self.is_valid = False
 
-    def create_trans_request(self, receiver: str, approver1: str, outfile: str):
+    def create_trans_request(self, receiver: str, approver1: str, outfile: str, run_id: int = None):
         ''' create a transfer request json file. outfile: transfer json. '''
         
         # sender: str, receiver: str, approver1: str
@@ -27,13 +32,14 @@ class Provider:
         receiver_did = self.did
         approv_did = get_user_id(approver1)
         settings = transettings.create_demo_setting(send_did, receiver_did, approv_did)
-        
-        asyncio.run(self.fill_trans_req(settings, outfile))
+
+
+        asyncio.run(self.fill_trans_req(settings, outfile, run_id))
         print(f'VC File {outfile} generated.')
 
-    async def fill_trans_req(self, trans: transettings.TranSettings, outfile: str):
+    async def fill_trans_req(self, trans: transettings.TranSettings, outfile: str, run_id: int = None):
         ''' Sign a verification credential. outfile: transfer VC. '''
-
+        star_time = time.time()
         issuance_date = datetime.now().replace(microsecond=0)
 
         credential = {
@@ -80,6 +86,34 @@ class Provider:
         credstr = json.dumps(credential)
         fileoper.write_text_file(outfile, credstr)
 
+        end_time = time.time()
+        elapsed_time = end_time - star_time
+        print(f"provider 创建签名o-VC 时间：{elapsed_time}")
+
+        # vc hash 上链
+        # === 新增：记录 Upload o-VC to Blockchain 时间并保存到独立 CSV ===
+        hashProviderSign = HashMethod.hash_file(outfile)
+        print("provider sign user vc:" + hashProviderSign)
+
+        start_time = time.time()
+        VCHashUpload.SetJson(hashProviderSign)
+        end_time = time.time()
+        upload_time = end_time - start_time
+        print(f"Upload o-VC to Blockchain：{upload_time}")
+
+        # 保存到独立 CSV
+        self._log_upload_time(run_id, upload_time)
+
+    def _log_upload_time(self, run_id: int, elapsed: float):
+        """Append upload time to provider_upload_times.csv"""
+        csv_file = "provider_upload_times.csv"
+        file_exists = os.path.isfile(csv_file)
+
+        with open(csv_file, mode='a', newline='', encoding='utf-8') as f:
+            writer = csv.writer(f)
+            if not file_exists:
+                writer.writerow(["run_id", "Upload o-VC to Blockchain"])
+            writer.writerow([run_id if run_id is not None else "N/A", f"{elapsed:.6f}"])
     def verify_vp_file(self, filename) -> bool:
         ''' Verify a credential presentation. If no error, start a transfer operation. '''
         print(f"Verifing {filename}...")

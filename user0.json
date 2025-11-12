@@ -1,0 +1,37 @@
+{
+  "@context": [
+    "https://www.w3.org/2018/credentials/v1",
+    "https://www.w3.org/2018/credentials/examples/v1"
+  ],
+  "id": "http://example.org/credentials/user",
+  "type": [
+    "VerifiableCredential",
+    "UserCredential"
+  ],
+  "credentialSubject": {
+    "id": "did:key:z6Mkq1PhWApEgvn2iG5vQd426Vm5XVR7Kty4cTA7PBQ5das4",
+    "orgnization": {
+      "name": "Example.Org",
+      "type": "No profit"
+    },
+    "@context": [
+      {
+        "userName": "https://schema.org/Text"
+      },
+      {
+        "orgnization": "https://schema.org/Org"
+      }
+    ],
+    "userName": "user0"
+  },
+  "issuer": "did:key:z6Mkr6djz6uus3VH1viTkVQ47BtLVBuxagHLfo9R8hcXqiMh",
+  "issuanceDate": "2025-11-12T18:02:17Z",
+  "proof": {
+    "type": "Ed25519Signature2018",
+    "proofPurpose": "assertionMethod",
+    "verificationMethod": "did:key:z6Mkr6djz6uus3VH1viTkVQ47BtLVBuxagHLfo9R8hcXqiMh#z6Mkr6djz6uus3VH1viTkVQ47BtLVBuxagHLfo9R8hcXqiMh",
+    "created": "2025-11-12T10:02:17.596Z",
+    "jws": "eyJhbGciOiJFZERTQSIsImNyaXQiOlsiYjY0Il0sImI2NCI6ZmFsc2V9..VJLXRSorbSyvNlrVNCW_p5DP3iAHx8L1NzROFtwYcV2W8bnfwCg9rNSk-PH1ytUd-OmHbPAWLVHicfRE7S2HDw"
+  },
+  "expirationDate": "2026-04-29T18:02:17Z"
+}

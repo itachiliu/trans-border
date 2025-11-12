@@ -32,6 +32,7 @@ class Issuer:
         asyncio.run(self.sign_a_user(username, userkey, outfile))
 
     async def sign_a_user(self, username: str, userkey: str, outfile: str):
+
         user_did = didkit.key_to_did("key", userkey)
         verification_method = await didkit.key_to_verification_method("key", self.key)
         issuance_date = datetime.now().replace(microsecond=0)
